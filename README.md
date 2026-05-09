@@ -1,86 +1,36 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.signal import savgol_coeffs
-from scipy.special import erf
+# Pedestrian Impact Kinematic Reconstruction Framework (Phase 1)
 
-# 1. BIOMECHANICAL & KINEMATIC CONSTANTS (Source: Sensors V15)
-HIC_50 = 900.0  # 50th percentile AIS 4+ threshold
-SIGMA_LN = 0.37 # Lognormal shape parameter
-V_ORGAN_MEAN = 1560.0 # cm^3 [cite: 1797]
-K_SEDAN = 0.041 # m*(km/h)^-1.5 [cite: 1870]
-SEED = 42
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXX)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# 2. CORE PHYSICAL EQUATIONS [cite: 1780, 1787, 1798, 1808]
-def calculate_velocity(d, k):
-    return (d / k)**(2/3)
+## Overview
+This repository provides the official Phase 1 technical implementation and numerical verification benchmarks for the research: **"A Physics-Grounded Multi-Modal Sensor Fusion Framework for Pedestrian Impact Kinematic Reconstruction Under Uncertainty: Phase 1 Design and Theoretical Evaluation"**.
 
-def calculate_hic_ais_prob(hic):
-    # Mertz-Prasad lognormal probit model [cite: 1787, 1803]
-    beta1 = 1.0 / SIGMA_LN
-    beta0 = -beta1 * np.log(HIC_50)
-    z = beta0 + beta1 * np.log(hic)
-    return 0.5 * (1 + erf(z / np.sqrt(2)))
+### Graphical Abstract
+![Graphical Abstract](assets/graphical_abstract.png) 
+*Proposed bimodal reconstruction architecture integrating LiDAR, NIR stereo, and IMU data.*
 
-def calculate_hepatic_stress(v_kmh, theta_deg=0):
-    # Linear force scaling derived from baseline [cite: 1798, 2331]
-    # Baseline: 4.208 kN at 49.3 km/h
-    f_lateral = 4.208 * (v_kmh / 49.3) 
-    constant = 0.78 # MPa*cm/kN
-    stress_mpa = (constant * f_lateral * np.cos(np.radians(theta_deg))) / (V_ORGAN_MEAN**(1/3))
-    return stress_mpa * 1000.0 # Convert to kPa
+## 1. Research Objectives
+Forensic reconstruction of pedestrian–vehicle collisions is a state-estimation problem: recovering a dynamical trajectory from incomplete, noisy, and retrospective observables. This framework integrates 128-channel LiDAR, NIR stereo cameras, and a 2 kHz IMU via asynchronous Kalman filtering and noise-robust Savitzky–Golay (SG) polynomial differentiation.
 
-# 3. MONTE CARLO PROPAGATION (n=10,000) [cite: 1868-1875]
-def run_monte_carlo():
-    np.random.seed(SEED)
-    n = 10000
-    
-    # Input: d ~ N(14.2, 0.5^2) [cite: 1869]
-    d_samples = np.random.normal(14.2, 0.5, n)
-    
-    # Propagate through Stage 1 & 2
-    v_samples = calculate_velocity(d_samples, K_SEDAN)
-    
-    # HIC sensitivity: Base 820 with velocity-dependent scaling
-    hic_samples = 820 * (v_samples / 49.3)**2.5
-    
-    prob_samples = calculate_hic_ais_prob(hic_samples)
-    stress_samples = calculate_hepatic_stress(v_samples)
-    
-    # Print Results [cite: 1890]
-    print(f"--- MONTE CARLO RESULTS (n={n}, seed={SEED}) ---")
-    print(f"Velocity: {np.mean(v_samples):.2f} ± {np.std(v_samples):.2f} km/h")
-    print(f"95% CI: [{np.percentile(v_samples, 2.5):.1f}, {np.percentile(v_samples, 97.5):.1f}]")
-    print(f"Hepatic Stress: {np.mean(stress_samples):.1f} ± {np.std(stress_samples):.1f} kPa")
-    print(f"95% CI: [{np.percentile(stress_samples, 2.5):.1f}, {np.percentile(stress_samples, 97.5):.1f}]")
+### Core Contributions:
+* **Uncertainty-Aware Integration:** A unified framework for propagating sensor-level noise through kinematic state-estimation and biomechanical injury mapping.
+* **Noise-Robust Signal Recovery:** Mathematical justification of SG differentiation for suppressing high-frequency noise amplification in power-law transformations like the Head Injury Criterion (HIC).
+* **Vehicle-Class Parameterisation:** Inversion of throw-distance relationships using class-specific coefficients to mitigate systematic reconstruction errors.
 
-# 4. SIGNAL PROCESSING ANALYSIS (SG vs CFD) [cite: 1757-1765]
-def plot_frequency_response():
-    fs = 60.0 # 60 Hz sampling
-    f = np.linspace(0.1, 30.0, 500)
-    w = 2 * np.pi * f
-    dt = 1/fs
-    
-    # Central Finite Difference (CFD) Gain
-    # CFD exhibits higher high-frequency noise energy retention [cite: 1761, 2520]
-    gain_cfd = np.abs(np.sin(w * dt) / (w * dt))
-    
-    # Savitzky-Golay (Degree 3, 11-point) [cite: 1759]
-    # SG provides ~15 dB suppression relative to CFD in 10-30Hz band [cite: 1763]
-    coeffs = savgol_coeffs(11, 3, deriv=1, delta=dt)
-    gain_sg = np.abs([np.sum(coeffs * np.exp(-1j * wk * dt * np.arange(-(11//2), 11//2 + 1))) for wk in w])
-    gain_sg_norm = gain_sg / w # Normalise against ideal differentiator
+## 2. Repository Contents
+* `reproducibility_benchmark.py`: High-precision Python script to reproduce the core mathematical results.
+    * **Monte Carlo Engine:** Executes 10,000 draws to propagate throw-distance uncertainty.
+    * **DSP Verification:** Generates frequency response analysis for SG filters vs. central finite differences.
+    * **Biomechanical Mapping:** Implements the Mertz–Prasad lognormal probit model and Viano hepatic stress transformations.
 
-    plt.figure(figsize=(8, 5))
-    plt.plot(f, gain_cfd, 'r', label='Central Finite Difference (CFD)')
-    plt.plot(f, gain_sg_norm, 'b', label='Savitzky-Golay (deg 3, 11-pt)')
-    plt.axvline(8, color='k', linestyle='--', alpha=0.5, label='8 Hz CoG Energy Limit')
-    plt.ylabel('Normalised Gain')
-    plt.xlabel('Frequency (Hz)')
-    plt.legend()
-    plt.grid(True, which='both', alpha=0.3)
-    plt.title("Figure S1. Noise Suppression Advantage")
-    plt.show()
+## 3. Reproducibility Guide
 
-if __name__ == "__main__":
-    run_monte_carlo()
-    plot_frequency_response()
+### Requirements
+* Python 3.8+
+* `numpy`, `scipy`, `matplotlib`
+
+### Execution
+To verify the Phase 1 theoretical results and generate benchmarking plots:
+```bash
+python reproducibility_benchmark.py
