@@ -1,4 +1,6 @@
 # Pedestrian Impact Kinematic Reconstruction Framework (Phase 1)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20096887.svg)](https://doi.org/10.5281/zenodo.20096887)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 1. Overview
 This repository provides the official Phase 1 technical implementation and numerical verification benchmarks for the research: **"A Physics-Grounded Multi-Modal Sensor Fusion Framework for Pedestrian Impact Kinematic Reconstruction Under Uncertainty: Phase 1 Design and Theoretical Evaluation"**.
