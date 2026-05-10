@@ -80,3 +80,99 @@ The system utilises a three-stage processing pipeline to recover kinematic state
 ### Requirements
 
 ```bash
+pip install -r requirements.txt
+```
+
+- Python 3.8+
+- `numpy`, `scipy`, `matplotlib`
+
+### Execution
+
+```bash
+python reproducibility_benchmark.py
+```
+
+### Expected Numerical Outputs
+
+All outputs are verified against the manuscript (Tables 4–8):
+
+| Output | Value | 95% CI |
+|---|---|---|
+| Impact velocity | 49.3 ± 1.16 km/h | [47.0, 51.6] |
+| Hepatic stress σ_liver | 283 ± 6.7 kPa | [270, 296] |
+| HIC₁₅ | 820 | [727, 917] |
+| P(AIS ≥ 4, cranial) | ≈ 0.40 | [0.28, 0.52] |
+
+Simulation specification: d ~ N(14.2, 0.5²) m · k = 0.041 (bonnet-type sedan, fixed) · seed = 42 · n = 10,000 · covariance = diagonal
+
+---
+
+## 6. Technical Benchmarks
+
+| Figure S1: DSP Verification | Figure S2: Monte Carlo Uncertainty Propagation |
+| :---: | :---: |
+| ![Figure S1](figure_s1.png) | ![Figure S2](figure_s2.png) |
+| *Savitzky–Golay noise suppression advantage over central finite differences — ~15 dB in the 10–30 Hz band.* | *End-to-end propagation from throw-distance measurement error through velocity, HIC₁₅, σ_liver, and P(AIS≥4).* |
+
+---
+
+## 7. Monte Carlo Simulation Specification
+
+As reported in manuscript Table 3:
+
+| Parameter | Distribution / Value | Basis |
+|---|---|---|
+| Throw distance *d* | N(14.2, 0.5²) m | ±0.5 m tape-measurement uncertainty |
+| Vehicle coefficient *k* | 0.041 (fixed) | Deterministic bonnet-type sedan |
+| Random seed | 42 | Computational reproducibility |
+| Covariance | Diagonal | Zero correlation between inputs |
+| *n* | 10,000 draws | — |
+
+---
+
+## 8. Academic Status & Citation
+
+This research is currently **under review** at *Sensors* (MDPI).
+
+**BibTeX:**
+```bibtex
+@article{barua2026forensic,
+  author    = {Barua, Nick and Hitosugi, Masahito},
+  title     = {A Physics-Grounded Multi-Modal Sensor Fusion Framework for
+               Pedestrian Impact Kinematic Reconstruction Under Uncertainty:
+               Phase 1 Design and Theoretical Evaluation},
+  journal   = {Sensors},
+  publisher = {MDPI},
+  year      = {2026},
+  note      = {Under review},
+  doi       = {10.5281/zenodo.20096887}
+}
+```
+
+---
+
+## 9. Intellectual Property & Disclosures
+
+- **Code Licence:** MIT — see `LICENSE`
+- **Patent:** Aspects of this framework are covered under Japanese Patent Application **No. 2025-167440** (filed 3 October 2025, Japan Patent Office)
+- **Coauthorship disclosure:** N.B. is a co-author of the MFCC-CNN architecture (Rezaul et al. 2024, Reference [6]) on which the acoustic branch of this framework is based; this overlap is disclosed in the interest of transparency
+
+---
+
+## 10. Validation Roadmap
+
+This repository covers **Phase 1 only**. No forensic deployment is proposed until Phase 5 is complete.
+
+| Phase | Setting | Target N | Status |
+|---|---|---|---|
+| 1 — Simulation & Algorithm | THUMS v5 / LS-DYNA | ≥150 scenarios | 🔄 In progress |
+| 2 — Instrumented Tests | Crash dummy trials | ≥50 trials | ⏳ Pending |
+| 3 — Real-World Data | CCTV/dashcam (IRB) | ≥30 cases | ⏳ Pending |
+| 4 — Clinical Validation | IRB-approved cohort | ≥100 cases | ⏳ Pending |
+| 5 — Deployment Readiness | Multi-site replication | ≥200 cases | ⏳ Pending |
+
+---
+
+## 11. Acknowledgments
+
+Supported by the Department of Legal Medicine, Shiga University of Medical Science, Otsu, Shiga, Japan.
