@@ -1,8 +1,8 @@
 # Pedestrian Impact Kinematic Reconstruction Framework (Phase 1)
 
 <p align="left">
-  <a href="https://doi.org/10.5281/zenodo.20096887">
-    <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20096887-blue.svg" alt="DOI">
+  <a href="https://doi.org/10.5281/zenodo.20271138">
+    <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20271138-blue.svg" alt="DOI">
   </a>
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
@@ -176,13 +176,12 @@ This research is currently **under review** at *Sensors* (MDPI).
   title     = {A Physics-Grounded Multi-Modal Sensor Fusion Framework for
                Pedestrian Impact Kinematic Reconstruction Under Uncertainty:
                Phase 1 Design and Theoretical Evaluation},
-  journal   = {Sensors},
+  journal   = {Sensors (Under-review)},
   publisher = {MDPI},
   year      = {2026},
   note      = {Under review},
-  doi       = {10.5281/zenodo.20096887}
+  doi       = {10.5281/zenodo.https://doi.org/10.5281/zenodo.20271138}
 }
-```
 
 ---
 
